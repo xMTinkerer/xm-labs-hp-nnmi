@@ -11,13 +11,16 @@
 * xMatters account - If you don't have one, [get one](https://www.xmatters.com)!
 
 # Files
+* [NNMi-CommPlan.zip](NNMi-CommPlan.zip) - Communications plan to be uploaded to xMatters
+* [NNMi-IAFiles.zip](NNMi-IAFiles.zip) - Integration Agent files to be extracted to `IAHOME/integrationservices/`
+
 
 # How it works
-When the agent starts, it makes a SOAP request into NNMi and creates a Subscription with the `FILTER` criteria and points to the IA http listener port (8081). When a new Incident in NNMi is created
+When the agent starts, it makes a SOAP request into NNMi and creates a Subscription with the `FILTER` criteria and points to the IA http listener port (8081). When a new Incident in NNMi is created that matches the filter criteria, NNMi makes an http request to the integration agent which translates the payload and makes the HTTP request to the Integration Builder. The builder then creates the event and users are notified. 
+If a user responds, their response is sent back to the agent, which then makes an http call into NNMi to update the status of the Incident. 
 
 
 # Installation
-Details of the installation go here. 
 
 ## xMatters set up
 
