@@ -7,13 +7,13 @@
 
 # Pre-Requisites
 * HP Network Node Manager i 10
-* Integration Agent 5.1.8+
+* Integration Agent 5.1.8+, [here](https://support.xmatters.com/hc/en-us/articles/201463419-Integration-Agent-for-xMatters-5-x-xMatters-On-Demand)
 * xMatters account - If you don't have one, [get one](https://www.xmatters.com)!
 
 # Files
 
 # How it works
-
+When the agent starts, it makes a SOAP request into NNMi and creates a Subscription with the `FILTER` criteria and points to the IA http listener port (8081). When a new Incident in NNMi is created
 
 
 # Installation
@@ -21,23 +21,40 @@ Details of the installation go here.
 
 ## xMatters set up
 
-**Pre-steps**: Install and configure the Integration Agent on the same box as Nagios XI. See details [here](https://support.xmatters.com/hc/en-us/articles/201463419-Integration-Agent-for-xMatters-5-x-xMatters-On-Demand).
+**Pre-steps**: 
+* Install and configure the Integration Agent, including the *Integration agent utilities*, on the same box as Nagios XI. See details [here](https://support.xmatters.com/hc/en-us/articles/201463419-Integration-Agent-for-xMatters-5-x-xMatters-On-Demand).
+
 
 ### xMatters on Demand
 1. Login to xMatters as a Developer and create a new user.
 2. Create a new REST user. See details [here](https://help.xmatters.com/integrations/xmatters/configuringxmatters.htm#Create)
 2. Import the [NNMiCommPlan.zip](NNMiCommPlan.zip) communications plan. 
 3. Next to the NNMi comm plan, click Edit > Access Permissions and give access to the user created in step 2. 
-4. Click Edit > Forms and next to the `FORMNAMEHERE` form, click Edit > Sender Permissions and give access to the user created in step 2. 
+4. Click Edit > Forms and next to the `New Incident` form, click Edit > Sender Permissions and give access to the user created in step 2. 
 5. Navigate to the Integration Builder tab and expand the Inbound Integrations section. Click on `Inbound from NNMi` and copy the URL at the bottom. 
 6. Navigate back to the Developer tab and click Event Domains. If this menu item is not available, open a support ticket [here](/link.me) and request the following step to be performed. 
 7. Click on the `applications` event domain. Scroll down to the Integration Services area and click Add New. Enter the following information into the form:
 
-* Name: hpnnmi
-* Description: HP NNMi Integration Service 
-* Path:
+   * Name: hpnnmi
+   * Description: HP NNMi Integration Service 
+   * Path: `blank`
 
 8. Click Save. 
+
+Next, set up the Outbound Integrations for communications back to the Agent. 
+1. Navigate to the Integration Builder inside the NNMi comm plan and expand the Outbound Integrations section. 
+2. Click the Add button. Populate the following fields:
+
+| Field | Value |
+| ----- | ----- |
+| Trigger | Device Delivery Status | 
+| Form | New Incident |
+| Action | Send to Integration Agent |
+| Integration Service | hpnnmi |
+| Specific Agent ID | **Leave blank** |
+| Integration Name | New Incident - Device Delivery |
+
+Repeat for trigger values of `Notification Response` and `Event Status`. 
 
 
 ### Integration Agent
@@ -52,14 +69,12 @@ Details of the installation go here.
 
 | Setting | Default Value | Description |
 | ------- | ------------- | ----------- |
-| `SERVICE_URL` | Specifies the call back to the integration agent when subscribing to the WS- Eventing service. <br/>
-Requires the following format: `http://{service-gateway-host}:{service- gateway-port}/http/{domain}_{name}` |
-| `NNMI_HOST` | localhost |  http://localhost:8081/http/hpnnmi_hpnnmi | To configure this setting, replace "localhost" with the IP address of your local server on which the WS-Eventing subscription service is installed. |
+| `SERVICE_URL` | http://localhost:8081/http/applications_hpnnmi | Specifies the call back to the integration agent when subscribing to the WS- Eventing service. <br/> Requires the following format: `http://{service-gateway-host}:{service- gateway-port}/http/{domain}_{name}` |
+| `NNMI_HOST` | localhost  | To configure this setting, replace "localhost" with the IP address of your local server on which the WS-Eventing subscription service is installed. |
 | `NNMI_PORT` | 80 | To configure this setting, replace "80" with the port number of your local server on which the WS-Eventing subscription service is installed. (For instructions on how to determine the port required, see [Identifying your HP NNMi port](#identifying-your-hp-nnmi-port) below)  |
 | `NNMI_USER` | webservices | Specifies the username of the web services client account to use when connecting to the HP NNMi web services. For more information, see "Creating a web services client" on page 19. |
 | `NNMI_PASSWORD` | nnm | Specifies the password for the web services account. |
-| `FILTER` | `/sys:onNotification/arg0[nature='ROOTCAUSE' and lifecycleState='com.hp.nms.incident.lifecycle.Registered' and severity='CRITICAL' and ( name='AddressNotResponding' or name='ConnectionDown' or name='InterfaceDown' or name='NodeDown' or name='NonSNMPNodeUnresponsive')]` | Specifies the filter to use when determining whether an event should be forwarded to xMatters. <br/>
-For instructions on how to update this setting, refer to [Updating the event injection filter](#updating-event-injection-filter) below |
+| `FILTER` | `/sys:onNotification/arg0[nature='ROOTCAUSE' and lifecycleState='com.hp.nms.incident.lifecycle.Registered' and severity='CRITICAL' and ( name='AddressNotResponding' or name='ConnectionDown' or name='InterfaceDown' or name='NodeDown' or name='NonSNMPNodeUnresponsive')]` | Specifies the filter to use when determining whether an event should be forwarded to xMatters. <br/> For instructions on how to update this setting, refer to [Updating the event injection filter](#updating-event-injection-filter) below |
 | `WEB_SERVICE_URL` | | URL endpoint pointing to the `Inbound from NNMi` integration script |
 | `INITIATOR` | nnmi | Username for authenticating to the `WEB_SERVICE_URL`. This should be the user created in xMatters above. |
 | `INITIATOR_PASSWORD_FILE` | conf/.initiatorpasswd | Password file for the `INITIATOR` user |
@@ -71,29 +86,15 @@ For instructions on how to update this setting, refer to [Updating the event inj
 Replacing `MYCOMPLEXPASSWORD` with the password for the xMatters user. 
 
 **Updating Event Recipients**
-To select a target for an incident you must update the integration agent service javascript file, `hpnnmi.js`, used to create the xMatters event information. By default, the recipients are set to “operations”. The contents of the file resemble the following:
+Recipients can be determined via one of two ways:
+1. By adding if/else conditions to the `Inbound from NNMi` inbound integration script. For example, to target the `Operations` group when the `name` field is `ConnectionDown`: (See the [trigger an event](http://help.xmatters.com/xmAPI/#trigger-an-event) section for details on the recipients element.)
+   ```javascript
+   if ("ConnectionDown".equals( payload.properties.name ) ){
+     payload.recipients = [ "Operations" ];
+   }
+   ```
+2. By creating [subscriptions](http://help.xmatters.com/OnDemand/userguide/receivingalerts/subscriptions/howtousesubscriptions.htm) to dynamically determine who receives a notification. 
 
-```javascript
-
-function apia_http( httpRequestProperties )
-{
-  // create apxml from http request 
-  log.debug(preamble+"Incoming HTTP Request: " + httpRequestProperties);
-
-
-  var requestBody = httpRequestProperties.getProperty("REQUEST_BODY");
-  if ( requestBody == null )
-  {
-    log.debug(preamble+"Received unrecognize Request, no notification was created. (Suppressed)");
-    return null;
-  }
-
-  ////////// snip //////////////
-
-INSERT SNIPPET HERE
-
-}
-```
 
 
 ### Updating Event Injection Filter
@@ -115,20 +116,20 @@ var FILTER = "/sys:onNotification/arg0[nature='ROOTCAUSE' and lifecycleState='co
 The following NNMi incident parameters can be used in this filter expression:
 
 | Data Type | Filter Name | NNMi Web Field | Possible Values |
-| ------- | ------- | ------- | ------- | ------- |
-| Int | id |  |  | |
-| String | uuid |  |  | | 
-| String | sourceUuid |  |  | |
-| String | sourceName | Source Object  |  | |
-| String | sourceNodeUuid |  |  | |
-| String | sourceNodeName | Node Name  |  | |
-| String | name | Name  |  | |
-| String | severity | Severity  | NORMAL WARNING MINOR MAJOR CRITICAL | |
-| String | priority | Priority  | com.hp.nms.incident.priority.Low com.hp.nms.incident.priority.Medium com.hp.nms.incident.priority.High com.hp.nms.incident.priority.Top com.hp.nms.incident.priority.None |
+| ------- | ------- | ------- | ------- | 
+| Int | id |  |  | 
+| String | uuid |  |  | 
+| String | sourceUuid |  |  | 
+| String | sourceName | Source Object  |  | 
+| String | sourceNodeUuid |  |  | 
+| String | sourceNodeName | Node Name  |  | 
+| String | name | Name  |  | 
+| String | severity | Severity  | NORMAL<br/>WARNING<br/>MINOR<br/>MAJOR<br/>CRITICAL | 
+| String | priority | Priority  | com.hp.nms.incident.priority.Low <br/>com.hp.nms.incident.priority.Medium <br/>com.hp.nms.incident.priority.High <br/>com.hp.nms.incident.priority.Top <br/>com.hp.nms.incident.priority.None |
 | String | lifecycleState | Lifecycle State | com.hp.nms.incident.lifecycle.Registered <br/>com.hp.nms.incident.lifecycle.InProgress<br/>com.hp.nms.incident.lifecycle.Completed<br/>com.hp.nms.incident.lifecycle.Closed |
 | String | category | Category | com.hp.nms.incident.category.Fault<br/>com.hp.nms.incident.category.Status<br/>com.hp.nms.incident.category.Config<br/>com.hp.nms.incident.category.Accounting<br/>com.hp.nms.incident.category.Performance<br/>com.hp.nms.incident.category.Security<br/>com.hp.nms.incident.category.Alert |
 | String | family | Family | com.hp.nms.incident.family.Address<br/>com.hp.nms.incident.family.Interface<br/>com.hp.nms.incident.family.Node<br/>com.hp.nms.incident.family.OSPF<br/>com.hp.nms.incident.family.HSRP<br/>com.hp.nms.incident.family.AggregatePort<br/>com.hp.nms.incident.family.Board<br/>com.hp.nms.incident.family.Connection<br/>com.hp.nms.incident.family.Correlation |
-| String | origin | Origin | MANAGEMENTSOFTW<br/>ARE<br/>MANUALLYCREATED<br/>REMOTELYGENERATED<br/>SNMPTRAP<br/>SYSLOG<br/>OTHER |
+| String | origin | Origin | MANAGEMENTSOFTWARE<br/>MANUALLYCREATED<br/>REMOTELYGENERATED<br/>SNMPTRAP<br/>SYSLOG<br/>OTHER |
 | String | nature | Correlation Nature | ROOTCAUSE<br/>SECONDARYROOTCAUSE<br/>SYMPTOM<br/>SERVICEIMPACT<br/>STREAMCORRELATION<br/>NONE |
 | Int | duplicateCout | Duplicate Cout |  |
 | String | formattedMessage | Message |  |
@@ -162,8 +163,10 @@ The following NNMi incident parameters can be used in this filter expression:
 
 ### Identifying your HP NNMi port
 You can determine whether the default port setting of 80 is correct for your HP NNMi installation by checking the port information contained in the HP NNMi port configuration file, located in the following folder:
-<NNM_DATA_DIR>\conf\nnm\props\nms-local.properties
 
+```
+<NNM_DATA_DIR>\conf\nnm\props\nms-local.properties
+```
 
 
 # Testing
