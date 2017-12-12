@@ -25,7 +25,7 @@ If a user responds, their response is sent back to the agent, which then makes a
 ## xMatters set up
 
 **Pre-steps**: 
-* Install and configure the Integration Agent, including the *Integration agent utilities*, on the same box as Nagios XI. See details [here](https://support.xmatters.com/hc/en-us/articles/201463419-Integration-Agent-for-xMatters-5-x-xMatters-On-Demand).
+* Install and configure the Integration Agent, including the *Integration agent utilities*. See details [here](https://support.xmatters.com/hc/en-us/articles/201463419-Integration-Agent-for-xMatters-5-x-xMatters-On-Demand).
 
 
 ### xMatters on Demand
