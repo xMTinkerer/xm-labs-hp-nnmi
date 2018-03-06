@@ -35,7 +35,7 @@ If a user responds, their response is sent back to the agent, which then makes a
 3. Next to the NNMi comm plan, click Edit > Access Permissions and give access to the user created in step 2. 
 4. Click Edit > Forms and next to the `New Incident` form, click Edit > Sender Permissions and give access to the user created in step 2. 
 5. Navigate to the Integration Builder tab and expand the Inbound Integrations section. Click on `Inbound from NNMi` and copy the URL at the bottom. 
-6. Navigate back to the Developer tab and click Event Domains. If this menu item is not available, open a support ticket [here](/link.me) and request the following step to be performed. 
+6. Navigate back to the Developer tab and click Event Domains. If this menu item is not available, open a support ticket [here](https://support.xmatters.com/hc/en-us/requests/new) and request the following step to be performed. 
 7. Click on the `applications` event domain. Scroll down to the Integration Services area and click Add New. Enter the following information into the form:
 
    * Name: hpnnmi
@@ -50,14 +50,14 @@ Next, set up the Outbound Integrations for communications back to the Agent.
 
 | Field | Value |
 | ----- | ----- |
-| Trigger | Device Delivery Status | 
+| Trigger | Device Delivery Updates | 
 | Form | New Incident |
 | Action | Send to Integration Agent |
 | Integration Service | hpnnmi |
 | Specific Agent ID | **Leave blank** |
 | Integration Name | New Incident - Device Delivery |
 
-Repeat for trigger values of `Notification Response` and `Event Status`. 
+Repeat for trigger values of `Notification Response` and `Event Status` and then make sure the slider switch is "on" (green showing). 
 
 
 ### Integration Agent
@@ -84,7 +84,7 @@ Repeat for trigger values of `Notification Response` and `Event Status`.
 
 8. To encrypt the password and generate the `INITIATOR_PASSWORD_FILE`, navigate to the `IAHOME/bin` directory and run the following command:
 ```bash
-./iadmin.sh --new MYCOMPLEXPASSWORD --file conf/.initiatorpasswd
+./iapassword.sh --new MYCOMPLEXPASSWORD --file conf/.initiatorpasswd
 ```
 Replacing `MYCOMPLEXPASSWORD` with the password for the xMatters user. 
 
