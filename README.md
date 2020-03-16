@@ -2,7 +2,9 @@
 
 
 <kbd>
-  <img src="https://github.com/xmatters/xMatters-Labs/raw/master/media/disclaimer.png">
+<a href="https://support.xmatters.com/hc/en-us/community/topics">
+   <img src="https://github.com/xmatters/xMatters-Labs/raw/master/media/disclaimer.png">
+</a>
 </kbd>
 
 # Pre-Requisites
@@ -11,7 +13,7 @@
 * xMatters account - If you don't have one, [get one](https://www.xmatters.com)!
 
 # Files
-* [NNMi-CommPlan.zip](NNMi-CommPlan.zip) - Communications plan to be uploaded to xMatters
+* [NNMi-Workflow.zip](NNMi-Workflow.zip) - Workflow to be uploaded to xMatters
 * [NNMi-IAFiles.zip](NNMi-IAFiles.zip) - Integration Agent files to be extracted to `IAHOME/integrationservices/`
 
 
@@ -31,8 +33,8 @@ If a user responds, their response is sent back to the agent, which then makes a
 ### xMatters on Demand
 1. Login to xMatters as a Developer and create a new user.
 2. Create a new REST user. See details [here](https://help.xmatters.com/integrations/xmatters/configuringxmatters.htm#Create)
-2. Import the [NNMiCommPlan.zip](NNMiCommPlan.zip) communications plan. 
-3. Next to the NNMi comm plan, click Edit > Access Permissions and give access to the user created in step 2. 
+2. Import the [NNMiCommPlan.zip](NNMiCommPlan.zip) workflow. 
+3. Next to the NNMi workflow, click Edit > Access Permissions and give access to the user created in step 2. 
 4. Click Edit > Forms and next to the `New Incident` form, click Edit > Sender Permissions and give access to the user created in step 2. 
 5. Navigate to the Integration Builder tab and expand the Inbound Integrations section. Click on `Inbound from NNMi` and copy the URL at the bottom. 
 6. Navigate back to the Developer tab and click Event Domains. If this menu item is not available, open a support ticket [here](https://support.xmatters.com/hc/en-us/requests/new) and request the following step to be performed. 
@@ -45,7 +47,7 @@ If a user responds, their response is sent back to the agent, which then makes a
 8. Click Save. 
 
 Next, set up the Outbound Integrations for communications back to the Agent. 
-1. Navigate to the Integration Builder inside the NNMi comm plan and expand the Outbound Integrations section. 
+1. Navigate to the Integration Builder inside the NNMi workflow and expand the Outbound Integrations section. 
 2. Click the Add button. Populate the following fields:
 
 | Field | Value |
